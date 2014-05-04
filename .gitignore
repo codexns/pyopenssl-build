@@ -1,5 +1,5 @@
-deps/
-py26-amd64/
-py26-win32/
-py33-amd64/
-py33-win32/
+win/deps/
+win/py26-amd64/
+win/py26-win32/
+win/py33-amd64/
+win/py33-win32/
