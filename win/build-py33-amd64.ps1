@@ -56,7 +56,7 @@ if (!(test-path $buildDir\out)) {
 }
 
 cd $buildDir\openssl-$opensslVersion\
-perl Configure VC-WIN64A enable-static-engine no-md2 no-rc5 --prefix=$buildDir\out
+perl Configure VC-WIN64A shared no-md2 no-rc5 no-ssl2 --prefix=$buildDir\out
 .\ms\do_win64a.bat
 nmake.exe -f .\ms\ntdll.mak
 nmake.exe -f .\ms\ntdll.mak install
