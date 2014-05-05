@@ -97,7 +97,7 @@ cd $LINUX_DIR
 cd $DEPS_DIR
 
 if [[ ! -e ./get-pip.py ]]; then
-    curl -O --location "https://bootstrap.pypa.io/get-pip.py"
+    wget "https://bootstrap.pypa.io/get-pip.py"
 fi
 
 export CPPFLAGS="-I${OUT_DIR}/include $CPPFLAGS"
