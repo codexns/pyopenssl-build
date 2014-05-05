@@ -6,3 +6,5 @@ win/py33-win32/
 osx/deps/
 osx/py26-x86_64/
 osx/py33-x86_64/
+linux/deps/
+linux/py26-x86_64/
