@@ -23,7 +23,7 @@ BUILD_DIR="${LINUX_DIR}/py33-x86_64"
 OUT_DIR="$BUILD_DIR/out"
 BIN_DIR="$OUT_DIR/bin"
 
-export LDFLAGS="-Wl,-rpath=. -Wl,-rpath=${OUT_DIR}/lib -L${OUT_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
+export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${OUT_DIR}/lib -L${OUT_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
 export CPPFLAGS="-I${OUT_DIR}/include -I${OUT_DIR}/include/openssl -I${OUT_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
 
 mkdir -p $DEPS_DIR
@@ -74,7 +74,7 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
     patch -p0 < $LINUX_DIR/patch/patch-SSL_set_session
     patch -p0 < $LINUX_DIR/patch/patch-SSL_shutdown
     patch -p0 < $LINUX_DIR/patch/patch-SSL_write
-    ./config shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=. -Wl,-rpath=${OUT_DIR}/lib -fPIC
+    ./config shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${OUT_DIR}/lib -fPIC
     echo 'OPENSSL_1.0.1G_PYTHON {
     global:
         *;
@@ -82,6 +82,8 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
 ' > openssl.ld
     make depend
     make
+    chrpath -r "\$ORIGIN/:${OUT_DIR}/lib" libssl.so.1.0.0
+    chrpath -r "\$ORIGIN/:${OUT_DIR}/lib" libcrypto.so.1.0.0
     make install
 
     cd $LINUX_DIR
@@ -136,4 +138,8 @@ if [[ ! -e ./get-pip.py ]]; then
 fi
 
 $BIN_DIR/python3.3 ./get-pip.py
+
+# Since this doesn't use make, we change the rpath to use a single $
+export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${OUT_DIR}/lib -L${OUT_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
+
 $BIN_DIR/pip3.3 install cryptography
