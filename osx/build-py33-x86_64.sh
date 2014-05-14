@@ -5,11 +5,6 @@ PYTHON_VERSION=3.3.5
 
 set -e
 
-export CC=/usr/bin/clang
-
-export CFLAGS="-arch x86_64 -mmacosx-version-min=10.7"
-export LDFLAGS="-arch x86_64 -mmacosx-version-min=10.7"
-
 # Figure out what directory this script is in
 SCRIPT="$0"
 if [[ $(readlink $SCRIPT) != "" ]]; then
@@ -24,6 +19,10 @@ DEPS_DIR="${OSX_DIR}/deps"
 BUILD_DIR="${OSX_DIR}/py33-x86_64"
 OUT_DIR="$BUILD_DIR/out"
 BIN_DIR="$OUT_DIR/bin"
+
+export CPPFLAGS="-I${OUT_DIR}/include -I${OUT_DIR}/include/openssl"
+export CFLAGS="-arch x86_64 -mmacosx-version-min=10.7"
+export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${OUT_DIR}/lib -arch x86_64 -mmacosx-version-min=10.7 -L${OUT_DIR}/lib"
 
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
@@ -50,14 +49,9 @@ cp -R $OPENSSL_DIR $BUILD_DIR
 
 cd $OPENSSL_BUILD_DIR
 
-OLD_LANG=$LANG
-unset LANG
-
-sed -i "" 's|\"iphoneos-cross\"\,\"llvm-gcc\:-O3|\"iphoneos-cross\"\,\"clang\:-O3|g' Configure
-sed -i "" 's/CC= cc/CC= clang/g' Makefile.org
 sed -i "" 's/MAKEDEPPROG=makedepend/MAKEDEPPROG=$(CC) -M/g' Makefile.org
-
-export LANG=$OLD_LANG
+# Compile OpenSSL with a name such that we look for it via rpath entries
+sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
 
 ./Configure darwin64-x86_64-cc shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR
 make depend
@@ -94,9 +88,6 @@ cd $DEPS_DIR
 if [[ ! -e ./get-pip.py ]]; then
     curl -O --location "https://bootstrap.pypa.io/get-pip.py"
 fi
-
-export CPPFLAGS="-I${OUT_DIR}/include $CPPFLAGS"
-export LDFLAGS="-L${OUT_DIR}/lib $LDFLAGS"
 
 $BIN_DIR/python3.3 ./get-pip.py
 $BIN_DIR/pip3.3 install cryptography
