@@ -50,11 +50,10 @@ cp -R $OPENSSL_DIR $BUILD_DIR
 
 cd $OPENSSL_BUILD_DIR
 
-sed -i "" 's/MAKEDEPPROG=makedepend/MAKEDEPPROG=$(CC) -M/g' Makefile.org
 # Compile OpenSSL with a name such that we look for it via rpath entries
 sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
 
-./Configure darwin64-x86_64-cc shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR
+CC=gcc ./Configure darwin64-x86_64-cc shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR
 make depend
 make
 make install
@@ -77,7 +76,7 @@ cp -R $PYTHON_DIR $BUILD_DIR
 
 cd $PYTHON_BUILD_DIR
 
-./configure --prefix=$OUT_DIR --without-gcc
+./configure --prefix=$OUT_DIR
 make
 make install
 
