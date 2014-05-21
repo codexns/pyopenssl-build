@@ -89,4 +89,4 @@ if [[ ! -e ./get-pip.py ]]; then
 fi
 
 $BIN_DIR/python3.3 ./get-pip.py
-$BIN_DIR/pip3.3 install cryptography
+$BIN_DIR/pip3.3 install cryptography pyopenssl
