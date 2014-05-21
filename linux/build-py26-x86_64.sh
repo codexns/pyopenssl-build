@@ -22,6 +22,7 @@ DEPS_DIR="${LINUX_DIR}/deps"
 BUILD_DIR="${LINUX_DIR}/py26-x86_64"
 STAGING_DIR="$BUILD_DIR/staging"
 BIN_DIR="$STAGING_DIR/bin"
+OUT_DIR="$BUILD_DIR/../../out/py26_linux_x64"
 
 export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
 export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I${STAGING_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
@@ -29,6 +30,7 @@ export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I${S
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $STAGING_DIR
+mkdir -p $OUT_DIR
 
 LIBFFI_DIR="${DEPS_DIR}/libffi-$LIBFFI_VERSION"
 LIBFFI_BUILD_DIR="${BUILD_DIR}/libffi-$LIBFFI_VERSION"
@@ -143,3 +145,14 @@ $BIN_DIR/python2.6 ./get-pip.py
 export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
 
 $BIN_DIR/pip2.6 install cryptography pyopenssl
+
+rm -Rf $OUT_DIR/*
+
+cp $STAGING_DIR/lib/libcrypto.so.1.0.0 $OUT_DIR/
+cp $STAGING_DIR/lib/libssl.so.1.0.0 $OUT_DIR/
+cp $STAGING_DIR/lib/python2.6/site-packages/six.py $OUT_DIR/
+cp -R $STAGING_DIR/lib/python2.6/site-packages/OpenSSL $OUT_DIR/
+cp -R $STAGING_DIR/lib/python2.6/site-packages/cryptography $OUT_DIR/
+cp -R $STAGING_DIR/lib/python2.6/site-packages/cffi $OUT_DIR/
+cp -R $STAGING_DIR/lib/python2.6/site-packages/pycparser $OUT_DIR/
+cp $STAGING_DIR/lib/python2.6/site-packages/_cffi_backend.so $OUT_DIR/
