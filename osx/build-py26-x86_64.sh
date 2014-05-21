@@ -17,17 +17,17 @@ OSX_DIR=$(cd ${SCRIPT%/*} && pwd -P)
 
 DEPS_DIR="${OSX_DIR}/deps"
 BUILD_DIR="${OSX_DIR}/py26-x86_64"
-OUT_DIR="$BUILD_DIR/out"
-BIN_DIR="$OUT_DIR/bin"
+STAGING_DIR="$BUILD_DIR/staging"
+BIN_DIR="$STAGING_DIR/bin"
 
-export CPPFLAGS="-I${OUT_DIR}/include -I${OUT_DIR}/include/openssl"
+export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl"
 # The macosx-version-min flags remove the dependency on libgcc_s.1.dylib
 export CFLAGS="-arch x86_64 -mmacosx-version-min=10.6"
-export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${OUT_DIR}/lib -arch x86_64 -mmacosx-version-min=10.6 -L${OUT_DIR}/lib"
+export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${STAGING_DIR}/lib -arch x86_64 -mmacosx-version-min=10.6 -L${STAGING_DIR}/lib"
 
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
-mkdir -p $OUT_DIR
+mkdir -p $STAGING_DIR
 
 OPENSSL_DIR="${DEPS_DIR}/openssl-$OPENSSL_VERSION"
 OPENSSL_BUILD_DIR="${BUILD_DIR}/openssl-$OPENSSL_VERSION"
@@ -53,7 +53,7 @@ cd $OPENSSL_BUILD_DIR
 # Compile OpenSSL with a name such that we look for it via rpath entries
 sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
 
-CC=gcc ./Configure darwin64-x86_64-cc shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR
+CC=gcc ./Configure darwin64-x86_64-cc shared no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR
 make depend
 make
 make install
@@ -76,7 +76,7 @@ cp -R $PYTHON_DIR $BUILD_DIR
 
 cd $PYTHON_BUILD_DIR
 
-./configure --prefix=$OUT_DIR
+./configure --prefix=$STAGING_DIR
 make
 make install
 
