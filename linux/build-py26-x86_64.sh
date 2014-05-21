@@ -41,9 +41,27 @@ OPENSSL_BUILD_DIR="${BUILD_DIR}/openssl-$OPENSSL_VERSION"
 PYTHON_DIR="${DEPS_DIR}/Python-$PYTHON_VERSION"
 PYTHON_BUILD_DIR="${BUILD_DIR}/Python-$PYTHON_VERSION"
 
+WGET_ERROR=0
+
+download() {
+    if (( ! $WGET_ERROR )); then
+        # Ignore error with wget
+        set +e
+        wget "$1"
+        # If wget is too old to support SNI
+        if (( $? == 5 )); then
+            WGET_ERROR=1
+        fi
+        set -e
+    fi
+    if (( $WGET_ERROR )); then
+        curl -O "$1"
+    fi
+}
+
 if [[ ! -e $OPENSSL_DIR ]]; then
     cd $DEPS_DIR
-    wget "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz"
+    download "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz"
     tar xvfz openssl-$OPENSSL_VERSION.tar.gz
     rm openssl-$OPENSSL_VERSION.tar.gz
     cd $LINUX_DIR
@@ -93,7 +111,7 @@ fi
 
 if [[ ! -e $LIBFFI_DIR ]]; then
     cd $DEPS_DIR
-    wget "ftp://sourceware.org/pub/libffi/libffi-$LIBFFI_VERSION.tar.gz"
+    download "ftp://sourceware.org/pub/libffi/libffi-$LIBFFI_VERSION.tar.gz"
     tar xvfz libffi-$LIBFFI_VERSION.tar.gz
     rm libffi-$LIBFFI_VERSION.tar.gz
     cd $LINUX_DIR
@@ -113,7 +131,7 @@ cd $LINUX_DIR
 
 if [[ ! -e $PYTHON_DIR ]]; then
     cd $DEPS_DIR
-    wget "https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz"
+    download "https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz"
     tar xvfz Python-$PYTHON_VERSION.tgz
     rm Python-$PYTHON_VERSION.tgz
     cd $LINUX_DIR
@@ -136,7 +154,7 @@ cd $LINUX_DIR
 cd $DEPS_DIR
 
 if [[ ! -e ./get-pip.py ]]; then
-    wget "https://bootstrap.pypa.io/get-pip.py"
+    download "https://bootstrap.pypa.io/get-pip.py"
 fi
 
 $BIN_DIR/python2.6 ./get-pip.py
