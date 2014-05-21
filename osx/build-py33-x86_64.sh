@@ -19,6 +19,7 @@ DEPS_DIR="${OSX_DIR}/deps"
 BUILD_DIR="${OSX_DIR}/py33-x86_64"
 STAGING_DIR="$BUILD_DIR/staging"
 BIN_DIR="$STAGING_DIR/bin"
+OUT_DIR="$BUILD_DIR/../../out/py33_osx_x64"
 
 export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl"
 export CFLAGS="-arch x86_64 -mmacosx-version-min=10.7"
@@ -27,6 +28,7 @@ export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${STAGING_DIR}/lib -a
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $STAGING_DIR
+mkdir -p $OUT_DIR
 
 OPENSSL_DIR="${DEPS_DIR}/openssl-$OPENSSL_VERSION"
 OPENSSL_BUILD_DIR="${BUILD_DIR}/openssl-$OPENSSL_VERSION"
@@ -90,3 +92,12 @@ fi
 
 $BIN_DIR/python3.3 ./get-pip.py
 $BIN_DIR/pip3.3 install cryptography pyopenssl
+
+cp $STAGING_DIR/lib/libcrypto.1.0.0.dylib $OUT_DIR/
+cp $STAGING_DIR/lib/libssl.1.0.0.dylib $OUT_DIR/
+cp $STAGING_DIR/lib/python3.3/site-packages/six.py $OUT_DIR/
+cp -R $STAGING_DIR/lib/python3.3/site-packages/OpenSSL $OUT_DIR/
+cp -R $STAGING_DIR/lib/python3.3/site-packages/cryptography $OUT_DIR/
+cp -R $STAGING_DIR/lib/python3.3/site-packages/cffi $OUT_DIR/
+cp -R $STAGING_DIR/lib/python3.3/site-packages/pycparser $OUT_DIR/
+cp $STAGING_DIR/lib/python3.3/site-packages/_cffi_backend.so $OUT_DIR/
