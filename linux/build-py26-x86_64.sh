@@ -142,4 +142,4 @@ $BIN_DIR/python2.6 ./get-pip.py
 # Since this doesn't use make, we change the rpath to use a single $
 export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
 
-$BIN_DIR/pip2.6 install cryptography
+$BIN_DIR/pip2.6 install cryptography pyopenssl
