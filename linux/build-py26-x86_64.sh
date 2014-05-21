@@ -20,7 +20,7 @@ LINUX_DIR=$(cd ${SCRIPT%/*} && pwd -P)
 
 DEPS_DIR="${LINUX_DIR}/deps"
 BUILD_DIR="${LINUX_DIR}/py26-x86_64"
-STAGING_DIR="$BUILD_DIR/out"
+STAGING_DIR="$BUILD_DIR/staging"
 BIN_DIR="$STAGING_DIR/bin"
 
 export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
