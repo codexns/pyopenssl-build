@@ -20,15 +20,15 @@ LINUX_DIR=$(cd ${SCRIPT%/*} && pwd -P)
 
 DEPS_DIR="${LINUX_DIR}/deps"
 BUILD_DIR="${LINUX_DIR}/py33-x86_64"
-OUT_DIR="$BUILD_DIR/out"
-BIN_DIR="$OUT_DIR/bin"
+STAGING_DIR="$BUILD_DIR/out"
+BIN_DIR="$STAGING_DIR/bin"
 
-export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${OUT_DIR}/lib -L${OUT_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
-export CPPFLAGS="-I${OUT_DIR}/include -I${OUT_DIR}/include/openssl -I${OUT_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
+export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
+export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I${STAGING_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
 
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
-mkdir -p $OUT_DIR
+mkdir -p $STAGING_DIR
 
 LIBFFI_DIR="${DEPS_DIR}/libffi-$LIBFFI_VERSION"
 LIBFFI_BUILD_DIR="${BUILD_DIR}/libffi-$LIBFFI_VERSION"
@@ -74,7 +74,7 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
     patch -p0 < $LINUX_DIR/patch/patch-SSL_set_session
     patch -p0 < $LINUX_DIR/patch/patch-SSL_shutdown
     patch -p0 < $LINUX_DIR/patch/patch-SSL_write
-    ./config shared no-md2 no-rc5 no-ssl2 --prefix=$OUT_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${OUT_DIR}/lib -fPIC
+    ./config shared no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${STAGING_DIR}/lib -fPIC
     echo 'OPENSSL_1.0.1G_PYTHON {
     global:
         *;
@@ -82,8 +82,8 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
 ' > openssl.ld
     make depend
     make
-    chrpath -r "\$ORIGIN/:${OUT_DIR}/lib" libssl.so.1.0.0
-    chrpath -r "\$ORIGIN/:${OUT_DIR}/lib" libcrypto.so.1.0.0
+    chrpath -r "\$ORIGIN/:${STAGING_DIR}/lib" libssl.so.1.0.0
+    chrpath -r "\$ORIGIN/:${STAGING_DIR}/lib" libcrypto.so.1.0.0
     make install
 
     cd $LINUX_DIR
@@ -103,7 +103,7 @@ fi
 cp -R $LIBFFI_DIR $BUILD_DIR
 
 cd $LIBFFI_BUILD_DIR
-./configure --disable-shared --prefix=${OUT_DIR} CFLAGS=-fPIC
+./configure --disable-shared --prefix=${STAGING_DIR} CFLAGS=-fPIC
 make
 make install
 
@@ -124,7 +124,7 @@ cp -R $PYTHON_DIR $BUILD_DIR
 
 cd $PYTHON_BUILD_DIR
 
-./configure --prefix=$OUT_DIR
+./configure --prefix=$STAGING_DIR
 make
 make install
 
@@ -140,6 +140,6 @@ fi
 $BIN_DIR/python3.3 ./get-pip.py
 
 # Since this doesn't use make, we change the rpath to use a single $
-export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${OUT_DIR}/lib -L${OUT_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
+export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
 
 $BIN_DIR/pip3.3 install cryptography
