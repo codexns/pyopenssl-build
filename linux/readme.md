@@ -1,5 +1,5 @@
 # Pre-requisites
 
 ```
-sudo apt-get install libz-dev chrpath
+sudo apt-get install libz-dev chrpath curl
 ```
