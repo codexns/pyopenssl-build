@@ -9,4 +9,6 @@ osx/py33-x86_64/
 linux/deps/
 linux/py26-x86_64/
 linux/py33-x86_64/
+linux/py26-i686/
+linux/py33-i686/
 out/
