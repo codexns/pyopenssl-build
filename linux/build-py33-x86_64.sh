@@ -18,6 +18,11 @@ if [[ $0 = ${0%/*} ]]; then
 fi
 LINUX_DIR=$(cd ${SCRIPT%/*} && pwd -P)
 
+if [[ $(uname -m) != 'x86_64' ]]; then
+    echo "Unable to cross-compile Python and this machine is running the arch $(uname -m), not x86_64"
+    exit 1
+fi
+
 DEPS_DIR="${LINUX_DIR}/deps"
 BUILD_DIR="${LINUX_DIR}/py33-x86_64"
 STAGING_DIR="$BUILD_DIR/staging"
