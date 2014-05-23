@@ -5,6 +5,8 @@ $opensslVersion = '1.0.1g'
 $winDir = split-path -parent $MyInvocation.MyCommand.Path
 $buildDir = join-path $winDir .\py26-amd64
 $depsDir = join-path $winDir .\deps
+$stagingDir = join-path $buildDir .\staging
+$outDir = join-path $winDir ..\out\py26_windows_x64
 
 # From http://stackoverflow.com/questions/4384814/how-to-call-batch-script-from-powershell/4385011#4385011
 &$winDir\invoke-environment '"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat"'
@@ -15,6 +17,14 @@ if (!(test-path $buildDir)) {
 
 if (!(test-path $depsDir)) {
     new-item $depsDir -itemtype directory
+}
+
+if (!(test-path $stagingDir)) {
+    new-item $stagingDir -itemtype directory
+}
+
+if (!(test-path $outDir)) {
+    new-item $outDir -itemtype directory
 }
 
 cd $depsDir
@@ -36,35 +46,45 @@ $env:PATH="$depsDir\perl\perl\site\bin;$depsDir\perl\perl\bin;$depsDir\perl\c\bi
 $env:TERM="dumb"
 
 
-if (!(test-path .\openssl-$opensslVersion.tar.gz)) {
-    $webclient.DownloadFile("http://www.openssl.org/source/openssl-$opensslVersion.tar.gz", "$depsDir\openssl-$opensslVersion.tar.gz")
+if (!(test-path .\openssl-$opensslVersion)) {
+    if (!(test-path .\openssl-$opensslVersion.tar.gz)) {
+        $webclient.DownloadFile("http://www.openssl.org/source/openssl-$opensslVersion.tar.gz", "$depsDir\openssl-$opensslVersion.tar.gz")
+    }
+
+    &"${env:ProgramFiles}\7-Zip\7z.exe" x -y .\openssl-$opensslVersion.tar.gz
+    &"${env:ProgramFiles}\7-Zip\7z.exe" x -y .\openssl-$opensslVersion.tar
+    remove-item .\openssl-$opensslVersion.tar
 }
-if (test-path .\openssl-$opensslVersion) {
-    remove-item -recurse $depsDir\openssl-$opensslVersion
-}
-&"${env:ProgramFiles}\7-Zip\7z.exe" x -y .\openssl-$opensslVersion.tar.gz
-&"${env:ProgramFiles}\7-Zip\7z.exe" x -y .\openssl-$opensslVersion.tar
-remove-item .\openssl-$opensslVersion.tar
 
 if (test-path $buildDir\openssl-$opensslVersion) {
-    remove-item -recurse $buildDir\openssl-$opensslVersion
+    # Try twice to prevent locking issues
+    try {
+        remove-item -recurse -force $buildDir\openssl-$opensslVersion
+    } catch {
+        remove-item -recurse -force $buildDir\openssl-$opensslVersion
+    }
 }
-move-item .\openssl-$opensslVersion $buildDir\openssl-$opensslVersion
-
-if (!(test-path $buildDir\out)) {
-    new-item $buildDir\out -itemtype directory
-}
+copy-item -recurse .\openssl-$opensslVersion $buildDir\
 
 cd $buildDir\openssl-$opensslVersion\
-perl Configure VC-WIN64A shared no-md2 no-rc5 no-ssl2 --prefix=$buildDir\out
+perl Configure VC-WIN64A shared no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
 .\ms\do_win64a.bat
 nmake.exe -f .\ms\ntdll.mak
 nmake.exe -f .\ms\ntdll.mak install
 cd ..
 
-$env:LIB="$buildDir\out\lib;${env:LIB}"
-$env:INCLUDE="$buildDir\out\include;${env:INCLUDE}"
-$env:PATH="$buildDir\out\bin;${env:PATH}"
-c:\Python26\Scripts\pip.exe install cryptography
+$env:LIB="$stagingDir\lib;${env:LIB}"
+$env:INCLUDE="$stagingDir\include;${env:INCLUDE}"
+$env:PATH="$stagingDir\bin;${env:PATH}"
+c:\Python26\Scripts\pip.exe install cryptography pyopenssl
 
 cd ..
+
+copy-item $stagingDir\bin\libeay32.dll $outDir\
+copy-item $stagingDir\bin\ssleay32.dll $outDir\
+copy-item C:\Python26\Lib\site-packages\six.py $outDir\
+copy-item C:\Python26\Lib\site-packages\_cffi_backend.pyd $outDir\
+copy-item -recurse C:\Python26\Lib\site-packages\cffi $outDir\
+copy-item -recurse C:\Python26\Lib\site-packages\cryptography $outDir\
+copy-item -recurse C:\Python26\Lib\site-packages\pycparser $outDir\
+copy-item -recurse C:\Python26\Lib\site-packages\OpenSSL $outDir\
