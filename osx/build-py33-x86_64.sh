@@ -29,7 +29,6 @@ export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${STAGING_DIR}/lib -a
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $STAGING_DIR
-mkdir -p $OUT_DIR
 
 OPENSSL_DIR="${DEPS_DIR}/openssl-$OPENSSL_VERSION"
 OPENSSL_BUILD_DIR="${BUILD_DIR}/openssl-$OPENSSL_VERSION"
@@ -93,6 +92,9 @@ fi
 
 $BIN_DIR/python3.3 ./get-pip.py
 $BIN_DIR/pip3.3 install --build $TMP_DIR cryptography pyopenssl
+
+rm -Rf $OUT_DIR/
+mkdir -p $OUT_DIR
 
 cp $STAGING_DIR/lib/libcrypto.1.0.0.dylib $OUT_DIR/
 cp $STAGING_DIR/lib/libssl.1.0.0.dylib $OUT_DIR/
