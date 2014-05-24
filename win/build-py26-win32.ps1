@@ -117,4 +117,4 @@ copy-item -recurse C:\Python26-x86\Lib\site-packages\OpenSSL $outDir\
 copy-item $stagingDir\bin\libeay32.dll $outDir\cryptography\
 copy-item $stagingDir\bin\ssleay32.dll $outDir\cryptography\
 
-&"${env:ProgramFiles}\7-Zip\7z.exe" a -r -tzip $outDir\..\cryptography-${cryptographyVersion}_pyopenssl-${pyopensslVersion}_py26_windows_x32.zip $outDir\*
+&"${env:ProgramFiles}\7-Zip\7z.exe" a -r -tzip $outDir\..\cryptography-${cryptographyVersion}_pyopenssl-${pyopensslVersion}_openssl-${opensslVersion}_py26_windows-x32.zip $outDir\*
