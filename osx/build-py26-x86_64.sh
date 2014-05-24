@@ -92,6 +92,12 @@ if [[ ! -e ./get-pip.py ]]; then
 fi
 
 $BIN_DIR/python2.6 ./get-pip.py
+if [[ $($BIN_DIR/pip2.6 list | grep pyopenssl) != "" ]]; then
+    $BIN_DIR/pip2.6 uninstall -y pyopenssl
+fi
+if [[ $($BIN_DIR/pip2.6 list | grep cryptography) != "" ]]; then
+    $BIN_DIR/pip2.6 uninstall -y cryptography
+fi
 $BIN_DIR/pip2.6 install --build $TMP_DIR cryptography pyopenssl
 
 rm -Rf $OUT_DIR/
