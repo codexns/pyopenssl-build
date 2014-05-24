@@ -55,7 +55,7 @@ cd $OPENSSL_BUILD_DIR
 # Compile OpenSSL with a name such that we look for it via rpath entries
 sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
 
-CC=gcc ./Configure darwin64-x86_64-cc shared no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR
+CC=gcc ./Configure darwin64-x86_64-cc enable-static-engine shared no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR
 make depend
 make
 make install
