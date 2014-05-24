@@ -72,6 +72,7 @@ cd ..
 $env:LIB="$stagingDir\lib;${env:LIB}"
 $env:INCLUDE="$stagingDir\include;${env:INCLUDE}"
 $env:PATH="$stagingDir\bin;${env:PATH}"
+c:\Python26\Scripts\pip.exe uninstall cryptography pyopenssl
 c:\Python26\Scripts\pip.exe install --no-use-wheel cryptography pyopenssl
 
 cd ..
