@@ -23,10 +23,6 @@ if (!(test-path $stagingDir)) {
     new-item $stagingDir -itemtype directory
 }
 
-if (!(test-path $outDir)) {
-    new-item $outDir -itemtype directory
-}
-
 cd $depsDir
 
 
@@ -76,15 +72,20 @@ cd ..
 $env:LIB="$stagingDir\lib;${env:LIB}"
 $env:INCLUDE="$stagingDir\include;${env:INCLUDE}"
 $env:PATH="$stagingDir\bin;${env:PATH}"
-c:\Python26\Scripts\pip.exe install cryptography pyopenssl
+c:\Python26\Scripts\pip.exe install --no-use-wheel cryptography pyopenssl
 
 cd ..
 
-copy-item $stagingDir\bin\libeay32.dll $outDir\
-copy-item $stagingDir\bin\ssleay32.dll $outDir\
+if (test-path $outDir) {
+    remove-item -recurse -force $outDir
+}
+new-item $outDir -itemtype directory
+
 copy-item C:\Python26\Lib\site-packages\six.py $outDir\
 copy-item C:\Python26\Lib\site-packages\_cffi_backend.pyd $outDir\
 copy-item -recurse C:\Python26\Lib\site-packages\cffi $outDir\
 copy-item -recurse C:\Python26\Lib\site-packages\cryptography $outDir\
 copy-item -recurse C:\Python26\Lib\site-packages\pycparser $outDir\
 copy-item -recurse C:\Python26\Lib\site-packages\OpenSSL $outDir\
+copy-item $stagingDir\bin\libeay32.dll $outDir\cryptography\
+copy-item $stagingDir\bin\ssleay32.dll $outDir\cryptography\
