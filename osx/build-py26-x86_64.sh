@@ -19,6 +19,7 @@ DEPS_DIR="${OSX_DIR}/deps"
 BUILD_DIR="${OSX_DIR}/py26-x86_64"
 STAGING_DIR="$BUILD_DIR/staging"
 BIN_DIR="$STAGING_DIR/bin"
+TMP_DIR="$BUILD_DIR/tmp"
 OUT_DIR="$BUILD_DIR/../../out/py26_osx_x64"
 
 export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl"
@@ -92,7 +93,7 @@ if [[ ! -e ./get-pip.py ]]; then
 fi
 
 $BIN_DIR/python2.6 ./get-pip.py
-$BIN_DIR/pip2.6 install cryptography pyopenssl
+$BIN_DIR/pip2.6 install --build $TMP_DIR cryptography pyopenssl
 
 cp $STAGING_DIR/lib/libcrypto.1.0.0.dylib $OUT_DIR/
 cp $STAGING_DIR/lib/libssl.1.0.0.dylib $OUT_DIR/
