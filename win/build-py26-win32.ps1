@@ -6,6 +6,7 @@ $winDir = split-path -parent $MyInvocation.MyCommand.Path
 $buildDir = join-path $winDir .\py26-win32
 $depsDir = join-path $winDir .\deps
 $stagingDir = join-path $buildDir .\staging
+$tmpDir = join-path $buildDir .\tmp
 $outDir = join-path $winDir ..\out\py26_windows_x32
 
 # From http://stackoverflow.com/questions/4384814/how-to-call-batch-script-from-powershell/4385011#4385011
@@ -81,8 +82,24 @@ cd ..
 $env:LIB="$stagingDir\lib;${env:LIB}"
 $env:INCLUDE="$stagingDir\include;${env:INCLUDE}"
 $env:PATH="$stagingDir\bin;${env:PATH}"
-c:\Python26-x86\Scripts\pip.exe uninstall cryptography pyopenssl
-c:\Python26-x86\Scripts\pip.exe install --no-use-wheel cryptography pyopenssl
+c:\Python26-x86\Scripts\pip.exe uninstall -y cryptography pyopenssl
+c:\Python26-x86\Scripts\pip.exe install --build "$tmpDir" --no-use-wheel cryptography pyopenssl
+
+$pyopensslVersion = ""
+c:\Python26-x86\Scripts\pip.exe show pyopenssl | foreach-object {
+    $splitLine = $_.split(": ")
+    if ($splitLine[0] -eq "Version") {
+        $pyopensslVersion = $splitLine[2]
+    }
+}
+
+$cryptographyVersion = ""
+c:\Python26-x86\Scripts\pip.exe show cryptography | foreach-object {
+    $splitLine = $_.split(": ")
+    if ($splitLine[0] -eq "Version") {
+        $cryptographyVersion = $splitLine[2]
+    }
+}
 
 cd ..
 
@@ -99,3 +116,5 @@ copy-item -recurse C:\Python26-x86\Lib\site-packages\pycparser $outDir\
 copy-item -recurse C:\Python26-x86\Lib\site-packages\OpenSSL $outDir\
 copy-item $stagingDir\bin\libeay32.dll $outDir\cryptography\
 copy-item $stagingDir\bin\ssleay32.dll $outDir\cryptography\
+
+&"${env:ProgramFiles}\7-Zip\7z.exe" a -r -tzip $outDir\..\cryptography-${cryptographyVersion}_pyopenssl-${pyopensslVersion}_py26_windows_x32.zip $outDir\*

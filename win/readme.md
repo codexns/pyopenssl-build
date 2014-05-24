@@ -8,3 +8,4 @@
 6. Install Visual Studio 2010 Pro and install service packs. Be sure to select 64 bit compilers.
 7. Copy `vcvars32.bat` to `C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\`
 8. Copy `vcvars64.bat` to `C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\`
+9. Install 7-Zip x64 to `C:\Programs Files\7-Zip\`
