@@ -63,7 +63,7 @@ if (test-path $buildDir\openssl-$opensslVersion) {
 copy-item -recurse .\openssl-$opensslVersion $buildDir\
 
 cd $buildDir\openssl-$opensslVersion\
-perl Configure VC-WIN64A shared no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
+perl Configure VC-WIN64A shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
 .\ms\do_win64a.bat
 nmake.exe -f .\ms\ntdll.mak
 nmake.exe -f .\ms\ntdll.mak install

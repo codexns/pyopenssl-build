@@ -72,7 +72,7 @@ if (test-path $buildDir\openssl-$opensslVersion) {
 copy-item -recurse .\openssl-$opensslVersion $buildDir\
 
 cd $buildDir\openssl-$opensslVersion\
-perl Configure VC-WIN32 shared no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
+perl Configure VC-WIN32 shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
 .\ms\do_nasm.bat
 nmake.exe -f .\ms\ntdll.mak
 nmake.exe -f .\ms\ntdll.mak install
