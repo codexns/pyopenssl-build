@@ -1,6 +1,6 @@
 # Python cryptography Build
 
-A project for building the following Python packages:
+A project for building the following packages:
 
  - cryptography
  - pyopenssl
@@ -9,7 +9,7 @@ along with:
 
  - OpenSSL
 
-for the operating system:
+for the operating systems:
 
  - Windows x86
  - Windows x64
@@ -17,7 +17,7 @@ for the operating system:
  - Linux i686
  - Linux x86_64
 
-and the following versions of Pytho:
+and the following versions of Python:
 
  - 2.6
  - 3.3
