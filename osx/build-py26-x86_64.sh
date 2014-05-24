@@ -100,6 +100,9 @@ if [[ $($BIN_DIR/pip2.6 list | grep cryptography) != "" ]]; then
 fi
 $BIN_DIR/pip2.6 install --build $TMP_DIR cryptography pyopenssl
 
+CRYPTOGRAPHY_VERSION=$($BIN_DIR/pip2.6 show cryptography | grep Version | sed 's/Version: //')
+PYOPENSSL_VERSION=$($BIN_DIR/pip2.6 show pyopenssl | grep Version | sed 's/Version: //')
+
 rm -Rf $OUT_DIR/
 mkdir -p $OUT_DIR
 
@@ -111,3 +114,5 @@ cp -R $STAGING_DIR/lib/python2.6/site-packages/cryptography $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/cffi $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/pycparser $OUT_DIR/
 cp $STAGING_DIR/lib/python2.6/site-packages/_cffi_backend.so $OUT_DIR/
+
+zip -r $OUT_DIR/../cryptography-${CRYPTOGRAPHY_VERSION}_pyopenssl-${PYOPENSSL_VERSION}_openssl-${OPENSSL_VERSION}_py26_osx-x64.zip $OUT_DIR/*
