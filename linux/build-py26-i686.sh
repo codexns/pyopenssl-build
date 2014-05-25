@@ -168,6 +168,13 @@ $BIN_DIR/python2.6 ./get-pip.py
 # Since this doesn't use make, we change the rpath to use a single $
 export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib"
 
+if [[ $($BIN_DIR/pip2.6 list | grep pyopenssl) != "" ]]; then
+    $BIN_DIR/pip2.6 uninstall -y pyopenssl
+fi
+if [[ $($BIN_DIR/pip2.6 list | grep cryptography) != "" ]]; then
+    $BIN_DIR/pip2.6 uninstall -y cryptography
+fi
+
 rm -Rf $TMP_DIR
 $BIN_DIR/pip2.6 install --build $TMP_DIR cryptography pyopenssl
 
