@@ -168,6 +168,13 @@ $BIN_DIR/python3.3 ./get-pip.py
 # Since this doesn't use make, we change the rpath to use a single $
 export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib -L/usr/lib/x86_64-linux-gnu"
 
+if [[ $($BIN_DIR/pip3.3 list | grep pyopenssl) != "" ]]; then
+    $BIN_DIR/pip3.3 uninstall -y pyopenssl
+fi
+if [[ $($BIN_DIR/pip3.3 list | grep cryptography) != "" ]]; then
+    $BIN_DIR/pip3.3 uninstall -y cryptography
+fi
+
 rm -Rf $TMP_DIR
 $BIN_DIR/pip3.3 install --build $TMP_DIR cryptography pyopenssl
 
