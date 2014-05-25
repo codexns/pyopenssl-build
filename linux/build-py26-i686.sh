@@ -36,7 +36,6 @@ export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I${S
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $STAGING_DIR
-mkdir -p $OUT_DIR
 
 LIBFFI_DIR="${DEPS_DIR}/libffi-$LIBFFI_VERSION"
 LIBFFI_BUILD_DIR="${BUILD_DIR}/libffi-$LIBFFI_VERSION"
@@ -178,7 +177,11 @@ fi
 rm -Rf $TMP_DIR
 $BIN_DIR/pip2.6 install --build $TMP_DIR cryptography pyopenssl
 
-rm -Rf $OUT_DIR/*
+CRYPTOGRAPHY_VERSION=$($BIN_DIR/pip2.6 show cryptography | grep Version | sed 's/Version: //')
+PYOPENSSL_VERSION=$($BIN_DIR/pip2.6 show pyopenssl | grep Version | sed 's/Version: //')
+
+rm -Rf $OUT_DIR
+mkdir -p $OUT_DIR
 
 cp $STAGING_DIR/lib/libcrypto.so.1.0.0 $OUT_DIR/
 cp $STAGING_DIR/lib/libssl.so.1.0.0 $OUT_DIR/
@@ -188,3 +191,6 @@ cp -R $STAGING_DIR/lib/python2.6/site-packages/cryptography $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/cffi $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/pycparser $OUT_DIR/
 cp $STAGING_DIR/lib/python2.6/site-packages/_cffi_backend.so $OUT_DIR/
+
+cd $OUT_DIR
+tar cvzpf ../cryptography-${CRYPTOGRAPHY_VERSION}_pyopenssl-${PYOPENSSL_VERSION}_openssl-${OPENSSL_VERSION}_py26_linux-x32.tar.gz *
