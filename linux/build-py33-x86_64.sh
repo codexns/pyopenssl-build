@@ -100,7 +100,7 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
     patch -p0 < $LINUX_DIR/patch/patch-SSL_set_session
     patch -p0 < $LINUX_DIR/patch/patch-SSL_shutdown
     patch -p0 < $LINUX_DIR/patch/patch-SSL_write
-    ./config shared no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${STAGING_DIR}/lib -fPIC
+    ./config shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${STAGING_DIR}/lib -fPIC
     echo 'OPENSSL_1.0.1G_PYTHON {
     global:
         *;
