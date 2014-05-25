@@ -27,6 +27,7 @@ DEPS_DIR="${LINUX_DIR}/deps"
 BUILD_DIR="${LINUX_DIR}/py33-i686"
 STAGING_DIR="$BUILD_DIR/staging"
 BIN_DIR="$STAGING_DIR/bin"
+TMP_DIR="$BUILD_DIR/tmp"
 OUT_DIR="$BUILD_DIR/../../out/py33_linux_x32"
 
 export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib"
@@ -167,7 +168,8 @@ $BIN_DIR/python3.3 ./get-pip.py
 # Since this doesn't use make, we change the rpath to use a single $
 export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib"
 
-$BIN_DIR/pip3.3 install cryptography pyopenssl
+rm -Rf $TMP_DIR
+$BIN_DIR/pip3.3 install --build $TMP_DIR cryptography pyopenssl
 
 rm -Rf $OUT_DIR/*
 
