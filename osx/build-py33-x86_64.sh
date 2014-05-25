@@ -97,12 +97,14 @@ fi
 if [[ $($BIN_DIR/pip3.3 list | grep cryptography) != "" ]]; then
     $BIN_DIR/pip3.3 uninstall -y cryptography
 fi
+
+rm -Rf $TMP_DIR
 $BIN_DIR/pip3.3 install --build $TMP_DIR cryptography pyopenssl
 
 CRYPTOGRAPHY_VERSION=$($BIN_DIR/pip3.3 show cryptography | grep Version | sed 's/Version: //')
 PYOPENSSL_VERSION=$($BIN_DIR/pip3.3 show pyopenssl | grep Version | sed 's/Version: //')
 
-rm -Rf $OUT_DIR/
+rm -Rf $OUT_DIR
 mkdir -p $OUT_DIR
 
 cp $STAGING_DIR/lib/libcrypto.1.0.0.dylib $OUT_DIR/
