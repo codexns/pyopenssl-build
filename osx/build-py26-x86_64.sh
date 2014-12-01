@@ -1,7 +1,10 @@
 #!/bin/bash
 
-OPENSSL_VERSION=1.0.1g
+OPENSSL_VERSION=1.0.1j
 PYTHON_VERSION=2.6.9
+LIBFFI_VERSION=3.2.1
+
+CLEAN_SSL=$1
 
 set -e
 
@@ -22,7 +25,7 @@ BIN_DIR="$STAGING_DIR/bin"
 TMP_DIR="$BUILD_DIR/tmp"
 OUT_DIR="$BUILD_DIR/../../out/py26_osx_x64"
 
-export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl"
+export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I$(xcrun --show-sdk-path)/usr/include -I${STAGING_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
 # The macosx-version-min flags remove the dependency on libgcc_s.1.dylib
 export CFLAGS="-arch x86_64 -mmacosx-version-min=10.6"
 export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${STAGING_DIR}/lib -arch x86_64 -mmacosx-version-min=10.6 -L${STAGING_DIR}/lib"
@@ -31,32 +34,59 @@ mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $STAGING_DIR
 
+LIBFFI_DIR="${DEPS_DIR}/libffi-$LIBFFI_VERSION"
+LIBFFI_BUILD_DIR="${BUILD_DIR}/libffi-$LIBFFI_VERSION"
+
 OPENSSL_DIR="${DEPS_DIR}/openssl-$OPENSSL_VERSION"
 OPENSSL_BUILD_DIR="${BUILD_DIR}/openssl-$OPENSSL_VERSION"
 
 PYTHON_DIR="${DEPS_DIR}/Python-$PYTHON_VERSION"
 PYTHON_BUILD_DIR="${BUILD_DIR}/Python-$PYTHON_VERSION"
 
-if [[ ! -e $OPENSSL_DIR ]]; then
-    cd $DEPS_DIR
-    curl -O --location "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz"
-    tar xvfz openssl-$OPENSSL_VERSION.tar.gz
-    rm openssl-$OPENSSL_VERSION.tar.gz
+
+if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
+    if [[ ! -e $OPENSSL_DIR ]]; then
+        cd $DEPS_DIR
+        curl -O --location "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz"
+        tar xvfz openssl-$OPENSSL_VERSION.tar.gz
+        rm openssl-$OPENSSL_VERSION.tar.gz
+        cd $OSX_DIR
+    fi
+
+    if [[ -e $OPENSSL_BUILD_DIR ]]; then
+        rm -R $OPENSSL_BUILD_DIR
+    fi
+    cp -R $OPENSSL_DIR $BUILD_DIR
+
+    cd $OPENSSL_BUILD_DIR
+
+    # Compile OpenSSL with a name such that we look for it via rpath entries
+    sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
+
+    CC=gcc ./Configure darwin64-x86_64-cc enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR
+    make depend
+    make
+    make install
+
     cd $OSX_DIR
 fi
 
-if [[ -e $OPENSSL_BUILD_DIR ]]; then
-    rm -R $OPENSSL_BUILD_DIR
+
+if [[ ! -e $LIBFFI_DIR ]]; then
+    cd $DEPS_DIR
+    curl -O --location "ftp://sourceware.org/pub/libffi/libffi-$LIBFFI_VERSION.tar.gz"
+    tar xvfz libffi-$LIBFFI_VERSION.tar.gz
+    rm libffi-$LIBFFI_VERSION.tar.gz
+    cd $OSX_DIR
 fi
-cp -R $OPENSSL_DIR $BUILD_DIR
 
-cd $OPENSSL_BUILD_DIR
+if [[ -e $LIBFFI_BUILD_DIR ]]; then
+    rm -R $LIBFFI_BUILD_DIR
+fi
+cp -R $LIBFFI_DIR $BUILD_DIR
 
-# Compile OpenSSL with a name such that we look for it via rpath entries
-sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
-
-CC=gcc ./Configure darwin64-x86_64-cc enable-static-engine shared no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR
-make depend
+cd $LIBFFI_BUILD_DIR
+./configure --disable-shared --prefix=${STAGING_DIR} CFLAGS=-fPIC
 make
 make install
 
@@ -108,8 +138,6 @@ PYOPENSSL_VERSION=$($BIN_DIR/pip2.6 show pyopenssl | grep Version | sed 's/Versi
 rm -Rf $OUT_DIR
 mkdir -p $OUT_DIR
 
-cp $STAGING_DIR/lib/libcrypto.1.0.0.dylib $OUT_DIR/
-cp $STAGING_DIR/lib/libssl.1.0.0.dylib $OUT_DIR/
 cp $STAGING_DIR/lib/python2.6/site-packages/six.py $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/OpenSSL $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/cryptography $OUT_DIR/
