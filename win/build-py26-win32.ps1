@@ -79,12 +79,12 @@ copy-item -recurse .\openssl-$opensslVersion $buildDir\
 
 cd $buildDir\openssl-$opensslVersion\
 perl Configure VC-WIN32 no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
+.\ms\do_nasm.bat
 
 move-item .\ms\libeay32.def .\ms\libeay32mt.def
 move-item .\ms\ssleay32.def .\ms\ssleay32mt.def
 (get-content .\ms\nt.mak | foreach-object {$_ -replace '^SSL=ssleay32$', 'SSL=ssleay32mt' -replace '^CRYPTO=libeay32$', 'CRYPTO=libeay32mt'}) | set-content .\ms\nt.mak
 
-.\ms\do_nasm.bat
 nmake.exe -f .\ms\nt.mak
 nmake.exe -f .\ms\nt.mak install
 cd ..
@@ -124,7 +124,5 @@ copy-item -recurse C:\Python26-x86\Lib\site-packages\cffi $outDir\
 copy-item -recurse C:\Python26-x86\Lib\site-packages\cryptography $outDir\
 copy-item -recurse C:\Python26-x86\Lib\site-packages\pycparser $outDir\
 copy-item -recurse C:\Python26-x86\Lib\site-packages\OpenSSL $outDir\
-copy-item $stagingDir\bin\libeay32.dll $outDir\cryptography\
-copy-item $stagingDir\bin\ssleay32.dll $outDir\cryptography\
 
 &"${env:ProgramFiles}\7-Zip\7z.exe" a -r -tzip $outDir\..\cryptography-${cryptographyVersion}_pyopenssl-${pyopensslVersion}_openssl-${opensslVersion}_py26_windows-x32.zip $outDir\*
