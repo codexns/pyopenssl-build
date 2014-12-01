@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OPENSSL_VERSION=1.0.1g
+OPENSSL_VERSION=1.0.1j
 PYTHON_VERSION=3.3.5
 LIBFFI_VERSION=3.0.13
 
@@ -80,27 +80,8 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
 
     cd $OPENSSL_BUILD_DIR
 
-    patch -p0 < $LINUX_DIR/patch/patch-cms
-    patch -p0 < $LINUX_DIR/patch/patch-smime
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_accept
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_clear
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_COMP_add_compression_method
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_connect
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_CTX_add_session
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_CTX_load_verify_locations
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_CTX_set_client_CA_list
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_CTX_set_session_id_context
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_CTX_set_ssl_version
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_CTX_use_psk_identity_hint
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_do_handshake
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_read
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_session_reused
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_set_fd
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_set_session
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_shutdown
-    patch -p0 < $LINUX_DIR/patch/patch-SSL_write
-    ./config shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,--version-script=openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${STAGING_DIR}/lib -fPIC
-    echo 'OPENSSL_1.0.1G_PYTHON {
+    ./config shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,--version-script=$OPENSSL_BUILD_DIR/openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${STAGING_DIR}/lib -fPIC
+    echo 'OPENSSL_1.0.1J_PYTHON {
     global:
         *;
 };
