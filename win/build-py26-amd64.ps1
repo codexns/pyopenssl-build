@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$opensslVersion = '1.0.1g'
+$opensslVersion = '1.0.1j'
 
 $winDir = split-path -parent $MyInvocation.MyCommand.Path
 $buildDir = join-path $winDir .\py26-amd64
@@ -23,6 +23,11 @@ if (!(test-path $depsDir)) {
 if (!(test-path $stagingDir)) {
     new-item $stagingDir -itemtype directory
 }
+
+if (test-path $tmpDir) {
+    remove-item -recurse -force $tmpDir
+}
+new-item $tmpDir -itemtype directory
 
 cd $depsDir
 
@@ -64,10 +69,15 @@ if (test-path $buildDir\openssl-$opensslVersion) {
 copy-item -recurse .\openssl-$opensslVersion $buildDir\
 
 cd $buildDir\openssl-$opensslVersion\
-perl Configure VC-WIN64A shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
+perl Configure VC-WIN64A no-md2 no-rc5 no-ssl2 --prefix=$stagingDir
 .\ms\do_win64a.bat
-nmake.exe -f .\ms\ntdll.mak
-nmake.exe -f .\ms\ntdll.mak install
+
+move-item .\ms\libeay32.def .\ms\libeay32mt.def
+move-item .\ms\ssleay32.def .\ms\ssleay32mt.def
+(get-content .\ms\nt.mak | foreach-object {$_ -replace '^SSL=ssleay32$', 'SSL=ssleay32mt' -replace '^CRYPTO=libeay32$', 'CRYPTO=libeay32mt'}) | set-content .\ms\nt.mak
+
+nmake.exe -f .\ms\nt.mak
+nmake.exe -f .\ms\nt.mak install
 cd ..
 
 $env:LIB="$stagingDir\lib;${env:LIB}"
