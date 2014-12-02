@@ -2,7 +2,7 @@
 
 OPENSSL_VERSION=1.0.1j
 PYTHON_VERSION=2.6.9
-LIBFFI_VERSION=3.0.13
+LIBFFI_VERSION=3.2.1
 
 CLEAN_SSL=$1
 
@@ -30,7 +30,7 @@ BIN_DIR="$STAGING_DIR/bin"
 TMP_DIR="$BUILD_DIR/tmp"
 OUT_DIR="$BUILD_DIR/../../out/py26_linux_x32"
 
-export LDFLAGS="-Wl,-rpath='\$\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib"
+export LDFLAGS="-L${STAGING_DIR}/lib"
 export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I${STAGING_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
 
 mkdir -p $DEPS_DIR
@@ -80,16 +80,9 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
 
     cd $OPENSSL_BUILD_DIR
 
-    ./config shared enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,--version-script=$OPENSSL_BUILD_DIR/openssl.ld -Wl,-Bsymbolic-functions -Wl,-rpath=XORIGIN/ -Wl,-rpath=${STAGING_DIR}/lib -fPIC
-    echo 'OPENSSL_1.0.1J_PYTHON {
-    global:
-        *;
-};
-' > openssl.ld
+    ./config enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR -Wl,-Bsymbolic-functions -fPIC
     make depend
     make
-    chrpath -r "\$ORIGIN/:${STAGING_DIR}/lib" libssl.so.1.0.0
-    chrpath -r "\$ORIGIN/:${STAGING_DIR}/lib" libcrypto.so.1.0.0
     make install
 
     cd $LINUX_DIR
@@ -114,6 +107,10 @@ make
 make install
 
 cd $LINUX_DIR
+
+
+export PKG_CONFIG_PATH="$STAGING_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+
 
 if [[ ! -e $PYTHON_DIR ]]; then
     cd $DEPS_DIR
@@ -145,9 +142,6 @@ fi
 
 $BIN_DIR/python2.6 ./get-pip.py
 
-# Since this doesn't use make, we change the rpath to use a single $
-export LDFLAGS="-Wl,-rpath='\$ORIGIN/' -Wl,-rpath=${STAGING_DIR}/lib -L${STAGING_DIR}/lib"
-
 if [[ $($BIN_DIR/pip2.6 list | grep pyopenssl) != "" ]]; then
     $BIN_DIR/pip2.6 uninstall -y pyopenssl
 fi
@@ -164,8 +158,6 @@ PYOPENSSL_VERSION=$($BIN_DIR/pip2.6 show pyopenssl | grep Version | sed 's/Versi
 rm -Rf $OUT_DIR
 mkdir -p $OUT_DIR
 
-cp $STAGING_DIR/lib/libcrypto.so.1.0.0 $OUT_DIR/
-cp $STAGING_DIR/lib/libssl.so.1.0.0 $OUT_DIR/
 cp $STAGING_DIR/lib/python2.6/site-packages/six.py $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/OpenSSL $OUT_DIR/
 cp -R $STAGING_DIR/lib/python2.6/site-packages/cryptography $OUT_DIR/
