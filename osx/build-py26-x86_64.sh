@@ -28,7 +28,7 @@ OUT_DIR="$BUILD_DIR/../../out/py26_osx_x64"
 export CPPFLAGS="-I${STAGING_DIR}/include -I${STAGING_DIR}/include/openssl -I$(xcrun --show-sdk-path)/usr/include -I${STAGING_DIR}/lib/libffi-${LIBFFI_VERSION}/include/"
 # The macosx-version-min flags remove the dependency on libgcc_s.1.dylib
 export CFLAGS="-arch x86_64 -mmacosx-version-min=10.6"
-export LDFLAGS="-Wl,-rpath -Wl,@loader_path -Wl,-rpath -Wl,${STAGING_DIR}/lib -arch x86_64 -mmacosx-version-min=10.6 -L${STAGING_DIR}/lib"
+export LDFLAGS="-arch x86_64 -mmacosx-version-min=10.6 -L${STAGING_DIR}/lib"
 
 mkdir -p $DEPS_DIR
 mkdir -p $BUILD_DIR
@@ -60,9 +60,6 @@ if [[ ! -e $OPENSSL_BUILD_DIR ]] || [[ $CLEAN_SSL != "" ]]; then
 
     cd $OPENSSL_BUILD_DIR
 
-    # Compile OpenSSL with a name such that we look for it via rpath entries
-    sed -i "" 's#-install_name $(INSTALLTOP)/$(LIBDIR)#-install_name @rpath#' Makefile.shared
-
     CC=gcc ./Configure darwin64-x86_64-cc enable-static-engine no-md2 no-rc5 no-ssl2 --prefix=$STAGING_DIR
     make depend
     make
@@ -91,6 +88,9 @@ make
 make install
 
 cd $OSX_DIR
+
+
+export PKG_CONFIG_PATH="$STAGING_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 
 if [[ ! -e $PYTHON_DIR ]]; then
