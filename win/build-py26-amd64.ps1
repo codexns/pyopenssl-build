@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$opensslVersion = '1.0.1j'
+$opensslVersion = '1.0.2d'
 
 $winDir = split-path -parent $MyInvocation.MyCommand.Path
 $buildDir = join-path $winDir .\py26-amd64
