@@ -24,4 +24,4 @@ and the following versions of Python:
 
 ## Downloads
 
-See https://github.com/wbond/python-cryptography-build/releases for downloads.
+See https://github.com/codexns/pyopenssl-build/releases for downloads.
